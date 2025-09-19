@@ -1,14 +1,11 @@
-const express = require('express');
+const fastify = require('fastify')({ 
+    logger: false,
+    bodyLimit: 10 * 1024 * 1024 // 10MB limit
+});
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
 
-const app = express();
 const port = 8080;
-
-// Middleware
-app.use(express.json({ limit: '10mb' }));
 
 // Initialize SQLite database (in-memory like H2)
 const db = new sqlite3.Database(':memory:');
@@ -37,12 +34,12 @@ async function doBackgroundWork(id, payload) {
 }
 
 // Ingest endpoint
-app.post('/ingest', async (req, res) => {
+fastify.post('/ingest', async (request, reply) => {
     const startTime = process.hrtime.bigint();
     
     try {
         const id = uuidv4();
-        const payload = req.body;
+        const payload = request.body;
         const content = JSON.stringify(payload);
         
         // Insert into database (synchronous like the Java version)
@@ -65,20 +62,21 @@ app.post('/ingest', async (req, res) => {
         const endTime = process.hrtime.bigint();
         const elapsedMs = Number(endTime - startTime) / 1000000; // Convert nanoseconds to milliseconds
         
-        res.json({
+        return {
             id: id,
             t_ms: Math.round(elapsedMs * 100) / 100 // Round to 2 decimal places
-        });
+        };
         
     } catch (error) {
         console.error('Error processing request:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        reply.code(500);
+        return { error: 'Internal server error' };
     }
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+fastify.get('/health', async (request, reply) => {
+    return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
 // Graceful shutdown
@@ -98,9 +96,18 @@ process.on('SIGINT', () => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`Node.js IoT Benchmark Server running on port ${port}`);
-    console.log(`Process ID: ${process.pid}`);
-    console.log(`Node.js version: ${process.version}`);
-    console.log('Ready to receive requests...');
-});
+// Start server
+const start = async () => {
+    try {
+        await fastify.listen({ port: port, host: '0.0.0.0' });
+        console.log(`Fastify IoT Benchmark Server running on port ${port}`);
+        console.log(`Process ID: ${process.pid}`);
+        console.log(`Runtime: ${process.version || 'Bun'}`);
+        console.log('Ready to receive requests...');
+    } catch (err) {
+        console.error('Error starting server:', err);
+        process.exit(1);
+    }
+};
+
+start();
