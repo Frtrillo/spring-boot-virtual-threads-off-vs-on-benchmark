@@ -43,13 +43,24 @@ NestJS **completamente optimizado** para máximo rendimiento:
 ### Resultados Completos
 
 #### 🏛️ Comparación Framework vs Framework (Timeout 7s)
-| Framework | Runtime | RPS Reportado | Timeouts | **RPS Exitosos** | Latencia | Rank |
-|-----------|---------|---------------|----------|------------------|----------|------|
-| **🥇 NestJS + Fastify** | **Bun** | 12,649 | 0 | **12,649** | 155ms | **1º** 🚀 |
-| **🥈 NestJS + Fastify** | **Node.js** | 13,464 | 1,070 | **~12,394** | 112ms | **2º** ⚡ |
-| **🥉 Bun Nativo** | **Bun (APIs nativas)** | 12,471 | 0 | **12,471** | 154ms | **3º** 🔥 |
-| **Spring Boot (Tradicional)** | Java 21 | 4,308 | 426 | **~3,882** | 954ms | 4º |
-| **Spring Boot + Virtual Threads** | Java 21 | 2,007 | 688 | **~1,319** | 982ms | 5º ❌ |
+| Framework                 | Runtime | RPS Reportado | Timeouts | RPS Exitosos | Latencia | Rank |
+| ------------------------- | ------- | ------------- | -------- | ------------ | -------- | ---- |
+| NestJS + Fastify          | Bun     | 12,649        | 0        | 12,649       | 155ms    | 1    |
+| NestJS + Fastify          | Node.js | 13,464        | 1,070    | 12,394       | 112ms    | 2    |
+| Bun Nativo (APIs nativas) | Bun     | 12,471        | 0        | 12,471       | 154ms    | 3    |
+| Spring Boot + Virtual Th. | Java 21 | 18,303        | 8,769    | 9,534        | 186ms    | 4    |
+| Spring Boot (Tradicional) | Java 21 | 3,970         | 8,892    | 4,922        | 156ms    | ✘    |
+| Spring Boot (Tradicional) | Java 21 | 4,308         | 426      | 3,882        | 954ms    | 4    |
+| Spring Boot + Virtual Th. | Java 21 | 2,007         | 688      | 1,319        | 982ms    | ✘    |
+
+📊 Cambios/Nuevos Resultados (Timeout 7s)
+
+Solo aparecen diferencias/nuevos datos en Spring Boot:
+
+| Framework                 | Runtime | RPS Reportado | Timeouts | RPS Exitosos | Latencia | Rank |
+| ------------------------- | ------- | ------------- | -------- | ------------ | -------- | ---- |
+| Spring Boot (Tradicional) | Java 21 | 4,308         | 426      | 3,882        | 954ms    | 4    |
+| Spring Boot + Virtual Th. | Java 21 | 2,007         | 688      | 1,319        | 982ms    | ✘    |
 
 #### ⚠️ **¿Qué son los Timeouts?**
 
