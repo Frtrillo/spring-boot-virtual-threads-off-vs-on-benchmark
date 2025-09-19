@@ -1,4 +1,6 @@
 com/example/iotbench/AsyncWorker.class
+com/example/iotbench/UltraFastApplication.class
+com/example/iotbench/UltraFastController.class
 com/example/iotbench/IngestService.class
 com/example/iotbench/IotBenchApplication.class
 com/example/iotbench/IngestController.class

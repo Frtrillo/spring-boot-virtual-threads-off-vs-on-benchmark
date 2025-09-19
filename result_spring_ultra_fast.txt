@@ -1,0 +1,9 @@
+Running 1m test @ http://localhost:8080/ultra/ingest
+  12 threads and 2000 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   188.18ms  322.65ms   2.00s    87.31%
+    Req/Sec     2.08k     1.16k    9.66k    69.49%
+  1300935 requests in 1.00m, 210.10MB read
+  Socket errors: connect 0, read 0, write 0, timeout 7274
+Requests/sec:  21662.76
+Transfer/sec:      3.50MB
