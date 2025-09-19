@@ -292,7 +292,6 @@ iot-bench/
 
 - [ ] Benchmark con bases de datos reales (PostgreSQL, MySQL)
 - [ ] Pruebas con diferentes tamaños de payload
-- [ ] Comparación con otros frameworks (Vert.x, Quarkus, Go, Rust)
 - [ ] Métricas de uso de memoria y CPU
 - [ ] Pruebas de carga sostenida (stress testing)
 
