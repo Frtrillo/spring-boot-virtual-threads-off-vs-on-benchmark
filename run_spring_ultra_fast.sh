@@ -84,18 +84,30 @@ pkill -f "iot-bench-0.1.0.jar" || true
 wait_for_port_free 8080
 
 echo ""
+echo "=== Spring Boot Ultra-Fast (Virtual Threads OFF) ==="
+java -Xms2g -Xmx2g -jar $JAR --spring.threads.virtual.enabled=false --spring.profiles.active=ultrafast &
+SPRING_ULTRA_OFF_PID=$!
+wait_for_port_ready 8080
+echo "Running ultra-fast benchmark (Virtual Threads OFF)..."
+wrk -t12 -c2000 -d60s -s post.lua http://localhost:8080/ultra/ingest > result_spring_ultra_fast_off.txt
+stop_app $SPRING_ULTRA_OFF_PID "Spring Boot Ultra-Fast OFF"
+
+echo ""
 echo "=== Spring Boot Ultra-Fast (Virtual Threads ON) ==="
 java -Xms2g -Xmx2g -jar $JAR --spring.threads.virtual.enabled=true --spring.profiles.active=ultrafast &
-SPRING_ULTRA_PID=$!
+SPRING_ULTRA_ON_PID=$!
 wait_for_port_ready 8080
-echo "Running ultra-fast benchmark..."
-wrk -t12 -c2000 -d60s -s post.lua http://localhost:8080/ultra/ingest > result_spring_ultra_fast.txt
-stop_app $SPRING_ULTRA_PID "Spring Boot Ultra-Fast"
+echo "Running ultra-fast benchmark (Virtual Threads ON)..."
+wrk -t12 -c2000 -d60s -s post.lua http://localhost:8080/ultra/ingest > result_spring_ultra_fast_on.txt
+stop_app $SPRING_ULTRA_ON_PID "Spring Boot Ultra-Fast ON"
 
 echo ""
 echo "=== SPRING BOOT ULTRA-FAST RESULTS ==="
-echo "Spring Boot Ultra-Fast (Virtual Threads):"
-grep -E "(Requests/sec|Transfer/sec|Latency)" result_spring_ultra_fast.txt || echo "No results found"
+echo "Spring Boot Ultra-Fast (Virtual Threads OFF):"
+grep -E "(Requests/sec|Transfer/sec|Latency)" result_spring_ultra_fast_off.txt || echo "No results found"
+echo ""
+echo "Spring Boot Ultra-Fast (Virtual Threads ON):"
+grep -E "(Requests/sec|Transfer/sec|Latency)" result_spring_ultra_fast_on.txt || echo "No results found"
 
 echo ""
 echo "=== COMPARISON WITH NESTJS ULTRA-FAST ==="
@@ -111,8 +123,11 @@ if [ -f "result_ultra_fast_node.txt" ]; then
     echo ""
 fi
 
-echo "Spring Boot Ultra-Fast (Java + H2):"
-grep -E "(Requests/sec|Transfer/sec)" result_spring_ultra_fast.txt || echo "No results"
+echo "Spring Boot Ultra-Fast (Java + H2 + Virtual Threads OFF):"
+grep -E "(Requests/sec|Transfer/sec)" result_spring_ultra_fast_off.txt || echo "No results"
+echo ""
+echo "Spring Boot Ultra-Fast (Java + H2 + Virtual Threads ON):"
+grep -E "(Requests/sec|Transfer/sec)" result_spring_ultra_fast_on.txt || echo "No results"
 
 echo ""
 echo "🎯 FAIR COMPARISON: Framework vs Framework (Ultra-Optimized)"

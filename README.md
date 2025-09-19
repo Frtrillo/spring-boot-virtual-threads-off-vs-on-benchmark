@@ -128,6 +128,9 @@ cd iot-bench
 
 # 6. Ultra-Fast NestJS + SQLite (máximo rendimiento)
 ./run_ultra_fast.sh
+
+# 7. Ultra-Fast Spring Boot (comparación justa)
+./run_spring_ultra_fast.sh
 ```
 
 ## 📁 Estructura del Proyecto
@@ -161,6 +164,8 @@ iot-bench/
 ├── run_ultra_fast.sh            # Benchmark Ultra-Fast NestJS
 ├── ultra-fast-server.ts         # NestJS optimizado al máximo
 ├── ultra-fast.controller.ts     # Controlador ultra-optimizado
+├── run_spring_ultra_fast.sh     # Benchmark Ultra-Fast Spring Boot
+├── UltraFastController.java     # Controlador Spring Boot optimizado
 └── clustered-server.js          # Servidor multi-core clustering
 ```
 
@@ -185,6 +190,14 @@ iot-bench/
 - **Prepared statements** pre-compilados
 - **Memory allocation** minimizada
 - **Sin background processing** ni overhead innecesario
+
+### Spring Boot Ultra-Fast
+- **Spring Boot 3.2.0** completamente optimizado
+- **H2 Database** (in-memory, equivalente a SQLite)
+- **JdbcTemplate** con prepared statements
+- **Virtual Threads ON/OFF** para comparación
+- **Sin AsyncWorker** ni background processing
+- **Logging minimizado** para máximo rendimiento
 
 ### Node.js/Bun Puro
 - **Fastify 4.24.3** (framework web rápido)
@@ -260,12 +273,12 @@ iot-bench/
 4. **☕ Java tradicional MEJOR** que Virtual Threads para CPU: 4,413 req/sec
 5. **🎯 El workload determina todo**: I/O vs CPU cambia completamente el ranking
 
-#### ⚡ **Del Benchmark Ultra-Fast (¡CONFIRMACIÓN!):**
-1. **🚀 Bun + NestJS DOMINA**: 21,154 req/sec (**+89.6%** vs Node.js)
-2. **📊 Confirma benchmarks oficiales**: Bun SQLite es superior
-3. **🎯 Framework completo**: NestJS + decoradores + DI + Fastify
-4. **⚡ Optimización importa**: Eliminar overhead innecesario es clave
-5. **🏆 Bun puede ganar** cuando se optimiza correctamente
+#### ⚡ **Del Benchmark Ultra-Fast (¡EMPATE TÉCNICO!):**
+1. **🏆 Spring Boot GANA**: 22,289 req/sec (VT OFF) - **Ganador absoluto**
+2. **🤝 Empate técnico**: Solo 5.4% diferencia entre Spring Boot y NestJS+Bun
+3. **🔥 NestJS + Bun**: Mejor latencia (92ms vs 135ms)
+4. **💡 Virtual Threads**: OFF mejor que ON para workloads simples (-1.3%)
+5. **🎯 Framework parity**: Ambos frameworks alcanzan ~21-22K req/sec optimizados
 
 #### 💡 **Lecciones Universales:**
 - **Bun + APIs nativas** = Rendimiento superior
@@ -282,10 +295,12 @@ iot-bench/
 
 | Framework | Runtime | Requests/sec | Transfer/sec | Latencia (avg) | Mejora vs Node.js | Rank |
 |-----------|---------|-------------|--------------|---------------|------------------|------|
-| **🥇 NestJS Ultra-Fast** | **Bun + SQLite nativo** | **21,154** | **3.47MB** | 92ms | **+89.6%** | **1º** 🚀 |
-| **🥈 NestJS Ultra-Fast** | **Node.js + SQLite3** | **11,157** | **2.35MB** | 120ms | **Referencia** | **2º** ⚡ |
+| **🥇 Spring Boot Ultra-Fast** | **Java 21 (VT OFF)** | **22,289** | **3.60MB** | 135ms | **+99.8%** | **1º** 🚀 |
+| **🥈 Spring Boot Ultra-Fast** | **Java 21 (VT ON)** | **21,999** | **3.55MB** | 168ms | **+97.2%** | **2º** ⚡ |
+| **🥉 NestJS Ultra-Fast** | **Bun + SQLite nativo** | **21,154** | **3.47MB** | 92ms | **+89.6%** | **3º** 🔥 |
+| **NestJS Ultra-Fast** | **Node.js + SQLite3** | **11,157** | **2.35MB** | 120ms | **Referencia** | 4º |
 
-### 🎯 **¡Finalmente Bun Domina con NestJS!**
+### 🎯 **¡Comparación Justa: Framework vs Framework!**
 
 #### ✅ **Optimizaciones Aplicadas:**
 - **Prepared statements** reutilizados
@@ -294,10 +309,18 @@ iot-bench/
 - **Fastify ultra-optimizado**
 - **Bun.sqlite nativo** vs node-sqlite3
 
-#### 📊 **Confirmación de Benchmarks Oficiales:**
-- **SQLite puro**: Bun 886K ops/sec vs Node.js 78K ops/sec (**+11.3x**)
-- **HTTP + SQLite**: Bun 21K req/sec vs Node.js 11K req/sec (**+89.6%**)
-- **Coincide con** [benchmarks oficiales de Bun](https://github.com/oven-sh/bun/tree/main/bench/sqlite)
+#### 📊 **Resultados Clave:**
+- **🏆 Spring Boot (VT OFF)**: 22,289 req/sec - **Ganador absoluto**
+- **⚡ Spring Boot (VT ON)**: 21,999 req/sec - Solo 1.3% más lento
+- **🔥 NestJS + Bun**: 21,154 req/sec - **Mejor latencia** (92ms)
+- **💡 Virtual Threads**: No siempre mejoran el rendimiento
+- **🎯 Empate técnico**: Diferencia mínima entre los 3 primeros
+
+#### 🤔 **¿Por qué Virtual Threads OFF gana?**
+- **Menos overhead** de context switching
+- **Thread pool tradicional** optimizado para este workload
+- **Sin complejidad** de virtual thread scheduling
+- **Workload simple**: No necesita miles de threads concurrentes
 
 ---
 
