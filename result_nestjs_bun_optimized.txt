@@ -1,9 +1,9 @@
 Running 1m test @ http://localhost:8080/ingest
   12 threads and 2000 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   232.03ms  185.41ms 755.45ms   48.51%
-    Req/Sec   724.99    382.79     3.10k    72.74%
-  519264 requests in 1.00m, 91.61MB read
-  Socket errors: connect 0, read 174, write 0, timeout 0
-Requests/sec:   8641.61
-Transfer/sec:      1.52MB
+    Latency   240.75ms  205.21ms   1.35s    56.48%
+    Req/Sec   730.70    420.82     3.06k    71.95%
+  521056 requests in 1.00m, 91.93MB read
+  Socket errors: connect 0, read 185, write 0, timeout 0
+Requests/sec:   8672.45
+Transfer/sec:      1.53MB

@@ -4,6 +4,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 export class DatabaseBunService implements OnModuleInit, OnModuleDestroy {
   private db: any;
   private isBun: boolean = false;
+  private insertStmt: any; // Pre-prepared statement for Bun
 
   onModuleInit() {
     // Check if we're running in Bun
@@ -32,6 +33,8 @@ export class DatabaseBunService implements OnModuleInit, OnModuleDestroy {
         content TEXT,
         ts DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
+      // Pre-prepare the insert statement for better performance
+      this.insertStmt = this.db.prepare('INSERT INTO iot_payload (id, content, ts) VALUES (?, ?, datetime("now"))');
     } else {
       // Node.js SQLite3
       this.db.serialize(() => {
@@ -52,11 +55,9 @@ export class DatabaseBunService implements OnModuleInit, OnModuleDestroy {
 
   async insertPayload(id: string, content: string): Promise<void> {
     if (this.isBun) {
-      // Bun native SQLite - Just use it synchronously but return a Promise
-      // The key insight: don't try to make sync operations async artificially
+      // Bun native SQLite - Use pre-prepared statement for maximum performance
       try {
-        const stmt = this.db.prepare('INSERT INTO iot_payload (id, content, ts) VALUES (?, ?, datetime("now"))');
-        stmt.run(id, content);
+        this.insertStmt.run(id, content);
         return Promise.resolve();
       } catch (err) {
         return Promise.reject(err);

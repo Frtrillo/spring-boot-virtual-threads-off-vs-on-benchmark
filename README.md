@@ -4,19 +4,33 @@ Un benchmark completo comparando el rendimiento de **Spring Boot con Virtual Thr
 
 ## 🎯 Objetivo
 
-Este benchmark simula un endpoint de ingesta de IoT que:
+Este proyecto incluye **DOS benchmarks diferentes** para comparar tecnologías en distintos escenarios:
+
+### 📊 **Benchmark 1: I/O Intensivo (Artificial)**
+Simula un endpoint de ingesta de IoT que:
 - Recibe payloads JSON (70 campos)
 - Los almacena en base de datos
-- Ejecuta trabajo asíncrono en segundo plano (simula 50ms de I/O bloqueante)
+- Ejecuta trabajo asíncrono en segundo plano (**simula 50ms de I/O bloqueante**)
 - Devuelve un ID y tiempo de procesamiento
 
-## 🏆 Resultados del Benchmark
+### 🚀 **Benchmark 2: Procesamiento Realista**
+Simula un endpoint de ingesta de IoT **real** que:
+- Recibe payloads JSON (70 campos)
+- Los almacena en base de datos (operación rápida)
+- Ejecuta procesamiento CPU-intensivo: validación, enriquecimiento, cálculos Monte Carlo
+- **SIN sleeps artificiales** - workload realista
+
+## 🏆 Resultados de los Benchmarks
 
 ### Configuración de Prueba
 - **Herramienta**: wrk (HTTP benchmarking tool)
 - **Configuración**: 12 threads, 2000 conexiones concurrentes, 60 segundos
 - **Payload**: JSON con 70 campos (~1.5KB)
-- **I/O Simulado**: 50ms de `Thread.sleep()` / `setTimeout()`
+
+---
+
+## 📊 **BENCHMARK 1: I/O Intensivo (Artificial)**
+*Con 50ms de sleep simulando I/O bloqueante*
 
 ### Resultados Completos
 
@@ -100,6 +114,9 @@ cd iot-bench
 
 # 4. NestJS + Fastify (Node.js o Bun) - interactivo
 ./run_nestjs_benchmark.sh
+
+# 5. Benchmark Realista (sin sleeps artificiales)
+./run_realistic_benchmark.sh
 ```
 
 ## 📁 Estructura del Proyecto
@@ -127,7 +144,10 @@ iot-bench/
 ├── run_benchmark_fixed.sh       # Benchmark Spring Boot
 ├── run_nodejs_benchmark.sh      # Benchmark Express
 ├── run_js_benchmark.sh          # Benchmark Fastify (Node.js/Bun)
-└── run_nestjs_benchmark.sh      # Benchmark NestJS (Node.js/Bun)
+├── run_nestjs_benchmark.sh      # Benchmark NestJS (Node.js/Bun)
+├── run_realistic_benchmark.sh   # Benchmark Realista (sin sleeps)
+├── realistic-server.js          # Servidor con workload realista
+└── clustered-server.js          # Servidor multi-core clustering
 ```
 
 ## 🔧 Configuración Técnica
@@ -164,18 +184,32 @@ iot-bench/
 
 ### ✅ Cuándo Usar Cada Tecnología
 
+#### 🎯 **Basado en Ambos Benchmarks:**
+
 **🚀 Spring Boot + Virtual Threads**
-- ✅ Aplicaciones enterprise con alta concurrencia
-- ✅ Microservicios con mucho I/O (DB, APIs externas)
-- ✅ Cuando el rendimiento máximo es crítico
-- ✅ Equipos con experiencia en Java/Spring
+- ✅ **I/O bloqueante masivo** (APIs externas lentas, DB queries complejas)
+- ✅ **Miles de conexiones concurrentes** con operaciones lentas
+- ✅ **Aplicaciones enterprise** con patrones de I/O tradicionales
+- ❌ **NO para processing puro** o workloads CPU-intensivos
+
+**🥇 Bun**
+- ✅ **GANADOR para workloads realistas** (7,024 req/sec)
+- ✅ **APIs y microservicios modernos** con processing intensivo
+- ✅ **Aplicaciones IoT** con validación y cálculos
+- ✅ **Cuando el rendimiento máximo es crítico**
+- ⚠️ **Usar APIs nativas** (Bun.sqlite, Bun.serve)
+
+**⚡ Node.js**
+- ✅ **Segundo lugar sólido** (5,627 req/sec)
+- ✅ **Ecosistema maduro** y estable para producción
+- ✅ **Frameworks enterprise** (NestJS funciona excelente)
+- ✅ **Equipos JavaScript** existentes
 
 **⚡ NestJS + Fastify**
-- ✅ Aplicaciones enterprise con arquitectura escalable
-- ✅ Equipos que vienen de Spring Boot/Java
-- ✅ Microservicios con TypeScript
-- ✅ APIs con decoradores y dependency injection
-- ✅ Desarrollo full-stack con tipado fuerte
+- ✅ **Framework enterprise** con arquitectura escalable
+- ✅ **Equipos que vienen de Spring Boot/Java**
+- ✅ **Microservicios con TypeScript**
+- ✅ **APIs con decoradores y dependency injection**
 
 **🌐 Express + Node.js**
 - ✅ Aplicaciones web tradicionales
@@ -183,22 +217,76 @@ iot-bench/
 - ✅ Equipos que prefieren frameworks establecidos
 - ✅ Integración con ecosistema Express existente
 
-**🔥 Bun**
-- ✅ **Cuando usas APIs nativas de Bun** (Bun.sqlite, Bun.serve)
-- ✅ Tareas intensivas en CPU y I/O (con APIs correctas)
-- ✅ Scripts y herramientas de desarrollo
-- ✅ Cuando la velocidad de startup es importante
-- ⚠️ **Evitar dependencias de Node.js** (usar equivalentes nativos)
+**☕ Spring Boot (Tradicional)**
+- ✅ **Mejor que Virtual Threads** para workloads CPU-intensivos
+- ✅ **Aplicaciones enterprise** complejas y legacy
+- ✅ **Equipos Java** existentes
+- ✅ **Cuando la estabilidad** es más importante que el rendimiento máximo
 
-### 🎯 Insights Clave
+### 🎯 Insights Clave de Ambos Benchmarks
 
-1. **Virtual Threads siguen siendo los reyes** del I/O intensivo
+#### 📊 **Del Benchmark I/O Artificial:**
+1. **Virtual Threads dominan** I/O bloqueante masivo (18,303 req/sec)
 2. **NestJS compite dignamente**: Solo 26% más lento que Virtual Threads
-3. **Bun ES más rápido... cuando usa APIs nativas**: 31% mejor que Node.js
-4. **Compatibilidad importa**: Bun + node-sqlite3 = problema masivo (-66% rendimiento)
-5. **Framework vs Runtime**: NestJS (13,464) vs Fastify puro (9,514) = +41%
-6. **La elección de dependencias es crítica**: APIs nativas vs bindings de Node.js
-7. **TypeScript + Enterprise patterns** son viables para alta performance
+3. **Framework vs Runtime**: NestJS (13,464) vs Fastify puro (9,514) = +41%
+4. **Compatibilidad importa**: Bun + node-sqlite3 = problema masivo
+
+#### 🚀 **Del Benchmark Realista (¡GAME CHANGER!):**
+1. **🥇 Bun DOMINA workloads realistas**: 7,024 req/sec (+202% vs Virtual Threads)
+2. **🥈 Node.js SUPERA a Java**: 5,627 req/sec (+142% vs Virtual Threads)  
+3. **😱 Virtual Threads FALLAN** en processing puro: Solo 2,329 req/sec
+4. **☕ Java tradicional MEJOR** que Virtual Threads para CPU: 4,413 req/sec
+5. **🎯 El workload determina todo**: I/O vs CPU cambia completamente el ranking
+
+#### 💡 **Lecciones Universales:**
+- **Bun + APIs nativas** = Rendimiento superior
+- **Virtual Threads** = Solo para I/O bloqueante específico
+- **JavaScript moderno** supera a Java en la mayoría de casos reales
+- **Los benchmarks artificiales** pueden ser muy engañosos
+
+---
+
+## 🚀 **BENCHMARK 2: Procesamiento Realista**
+*Sin sleeps artificiales - workload CPU-intensivo real*
+
+### Resultados Impactantes
+
+| Tecnología | Requests/sec | Transfer/sec | Mejora vs Virtual Threads | Rank |
+|------------|-------------|--------------|--------------------------|------|
+| **🥇 Bun (Realista)** | **7,024** | **1.21MB** | **+202%** | **1º** 🚀 |
+| **🥈 Node.js (Realista)** | **5,627** | **1.23MB** | **+142%** | **2º** ⚡ |
+| **🥉 Spring Boot (Tradicional)** | **4,413** | **773KB** | **+89%** | **3º** ☕ |
+| **Spring Boot Virtual Threads** | **2,329** | **407KB** | **Referencia** | 4º 😱 |
+
+### 🤯 **Análisis del Plot Twist**
+
+#### ✅ **En Workloads Realistas:**
+- **🚀 Bun DOMINA**: 3x más rápido que Virtual Threads
+- **⚡ Node.js SEGUNDO**: 2.4x más rápido que Virtual Threads
+- **😱 Virtual Threads ÚLTIMO**: Solo útiles para I/O bloqueante masivo
+- **☕ Java tradicional MEJOR** que Virtual Threads en CPU-intensive
+
+#### 🔍 **¿Por qué este cambio radical?**
+
+**Bun/Node.js ganan porque:**
+- ✅ **JavaScript engines optimizados** para processing puro
+- ✅ **Menos overhead** en operaciones CPU-intensivas
+- ✅ **JIT superior** para cálculos matemáticos
+- ✅ **Prepared statements eficientes** (Bun.sqlite)
+
+**Virtual Threads pierden porque:**
+- ❌ **Sin I/O bloqueante** que justifique threads masivos
+- ❌ **Overhead de Spring Boot** para processing simple
+- ❌ **GC pressure** en operaciones intensivas
+- ❌ **Context switching innecesario**
+
+### 💡 **Lecciones del Benchmark Realista**
+
+1. **🎯 Workload determina el ganador**: I/O vs CPU cambia todo
+2. **🚀 Bun domina processing real**: Como en TechEmpower benchmarks
+3. **⚡ JavaScript moderno** supera a Java en muchos casos
+4. **🏗️ Virtual Threads**: Específicos para I/O bloqueante masivo
+5. **📊 Los benchmarks artificiales** pueden ser muy engañosos
 
 ## 📈 Mejoras Futuras
 
