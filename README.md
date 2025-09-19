@@ -42,18 +42,18 @@ NestJS **completamente optimizado** para máximo rendimiento:
 
 ### Resultados Completos
 
-#### 🏛️ Comparación Framework vs Framework
+#### 🏛️ Comparación Framework vs Framework (Timeout 7s)
 | Framework | Runtime | RPS Reportado | Timeouts | **RPS Exitosos** | Latencia | Rank |
 |-----------|---------|---------------|----------|------------------|----------|------|
 | **🥇 NestJS + Fastify** | **Bun** | 12,649 | 0 | **12,649** | 155ms | **1º** 🚀 |
 | **🥈 NestJS + Fastify** | **Node.js** | 13,464 | 1,070 | **~12,394** | 112ms | **2º** ⚡ |
 | **🥉 Bun Nativo** | **Bun (APIs nativas)** | 12,471 | 0 | **12,471** | 154ms | **3º** 🔥 |
-| **Spring Boot + Virtual Threads** | Java 21 | 18,303 | 8,769 | **~9,534** | 186ms | 4º |
-| **Spring Boot (Tradicional)** | Java 21 | 3,970 | 8,892 | **~-4,922** | 156ms | ❌ |
+| **Spring Boot (Tradicional)** | Java 21 | 4,308 | 426 | **~3,882** | 954ms | 4º |
+| **Spring Boot + Virtual Threads** | Java 21 | 2,007 | 688 | **~1,319** | 982ms | 5º ❌ |
 
 #### ⚠️ **¿Qué son los Timeouts?**
 
-Los **timeouts** son requests que **wrk envió pero no recibió respuesta** dentro del tiempo límite (2 segundos por defecto). Esto indica:
+Los **timeouts** son requests que **wrk envió pero no recibió respuesta** dentro del tiempo límite (**7 segundos** en esta prueba). Esto indica:
 
 - **🔴 Sobrecarga del servidor**: No puede procesar todas las requests
 - **🔴 Thread pool exhausted**: Sin threads disponibles (Java tradicional)
@@ -280,12 +280,13 @@ iot-bench/
 
 ### 🎯 Insights Clave de Ambos Benchmarks
 
-#### 📊 **Del Benchmark I/O Artificial (¡CORREGIDO!):**
-1. **🚀 Bun + NestJS GANA**: 12,649 req/sec exitosos (0 timeouts)
+#### 📊 **Del Benchmark I/O Artificial (¡TIMEOUT 7s!):**
+1. **🚀 Bun + NestJS DOMINA**: 12,649 req/sec exitosos (0 timeouts)
 2. **⚡ Node.js + NestJS**: ~12,394 req/sec exitosos (pocos timeouts)
-3. **😱 Virtual Threads FALLAN**: Solo ~9,534 req/sec exitosos (muchos timeouts)
-4. **💡 Los timeouts distorsionan**: RPS reportado ≠ RPS real exitoso
-5. **🎯 Estabilidad importa**: 0 timeouts > alto throughput con errores
+3. **🥉 Spring Boot tradicional**: ~3,882 req/sec exitosos (426 timeouts)
+4. **😱 Virtual Threads COLAPSAN**: Solo ~1,319 req/sec exitosos (688 timeouts)
+5. **💡 Timeout generoso confirma**: Virtual Threads fallan con sleep artificial
+6. **🎯 Estabilidad >> Throughput**: 0 timeouts es mejor que números inflados
 
 #### 🚀 **Del Benchmark Realista (¡GAME CHANGER!):**
 1. **🥇 Bun DOMINA workloads realistas**: 7,024 req/sec (+202% vs Virtual Threads)

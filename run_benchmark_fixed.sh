@@ -92,8 +92,8 @@ echo "Started with PID: $PID_OFF"
 # Wait for application to be ready
 wait_for_port_ready 8080
 
-echo "Running wrk benchmark (60 seconds)..."
-wrk -t12 -c2000 -d60s -s post.lua http://localhost:8080/ingest > result_off.txt
+echo "Running wrk benchmark (60 seconds) with 7s timeout..."
+wrk -t12 -c2000 -d60s --timeout 7s -s post.lua http://localhost:8080/ingest > result_off.txt
 echo "Results saved to result_off.txt"
 
 # Stop first application
@@ -110,8 +110,8 @@ echo "Started with PID: $PID_ON"
 # Wait for application to be ready
 wait_for_port_ready 8080
 
-echo "Running wrk benchmark (60 seconds)..."
-wrk -t12 -c2000 -d60s -s post.lua http://localhost:8080/ingest > result_on.txt
+echo "Running wrk benchmark (60 seconds) with 7s timeout..."
+wrk -t12 -c2000 -d60s --timeout 7s -s post.lua http://localhost:8080/ingest > result_on.txt
 echo "Results saved to result_on.txt"
 
 # Stop second application
