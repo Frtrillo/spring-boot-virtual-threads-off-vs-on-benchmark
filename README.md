@@ -25,7 +25,8 @@ Este benchmark simula un endpoint de ingesta de IoT que:
 |-----------|---------|-------------|--------------|---------------|-----------|------|
 | **🥇 Spring Boot + Virtual Threads** | Java 21 | **18,303** | **3.13MB** | 186ms | 8,769 | **1º** |
 | **🥈 NestJS + Fastify** | Node.js | **13,464** | **3.00MB** | 112ms | 1,070 | **2º** |
-| **🥉 NestJS + Fastify** | Bun | **12,649** | **2.24MB** | 155ms | 0 | **3º** |
+| **🥉 Bun Nativo** | Bun (APIs nativas) | **12,471** | **1.96MB** | 154ms | 0 | **3º** |
+| **NestJS + Fastify** | Bun | **12,649** | **2.24MB** | 155ms | 0 | 4º |
 | **Spring Boot (Tradicional)** | Java 21 | **3,970** | **695KB** | 156ms | 8,892 | 4º |
 
 #### 🚀 Comparación Runtime Puro vs Framework
@@ -183,19 +184,21 @@ iot-bench/
 - ✅ Integración con ecosistema Express existente
 
 **🔥 Bun**
-- ✅ Tareas intensivas en CPU
+- ✅ **Cuando usas APIs nativas de Bun** (Bun.sqlite, Bun.serve)
+- ✅ Tareas intensivas en CPU y I/O (con APIs correctas)
 - ✅ Scripts y herramientas de desarrollo
 - ✅ Cuando la velocidad de startup es importante
-- ❌ No recomendado para este tipo de I/O (por ahora)
+- ⚠️ **Evitar dependencias de Node.js** (usar equivalentes nativos)
 
 ### 🎯 Insights Clave
 
 1. **Virtual Threads siguen siendo los reyes** del I/O intensivo
 2. **NestJS compite dignamente**: Solo 26% más lento que Virtual Threads
-3. **Framework vs Runtime**: NestJS (13,464) vs Fastify puro (9,514) = +41%
-4. **Node.js vs Bun**: En frameworks enterprise, Node.js sigue ganando
-5. **Arquitectura importa**: Dependency injection y decoradores tienen overhead mínimo
-6. **TypeScript + Enterprise patterns** son viables para alta performance
+3. **Bun ES más rápido... cuando usa APIs nativas**: 31% mejor que Node.js
+4. **Compatibilidad importa**: Bun + node-sqlite3 = problema masivo (-66% rendimiento)
+5. **Framework vs Runtime**: NestJS (13,464) vs Fastify puro (9,514) = +41%
+6. **La elección de dependencias es crítica**: APIs nativas vs bindings de Node.js
+7. **TypeScript + Enterprise patterns** son viables para alta performance
 
 ## 📈 Mejoras Futuras
 
