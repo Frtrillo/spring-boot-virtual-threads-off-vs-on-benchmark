@@ -23,7 +23,8 @@
     "resolveJsonModule": true
   },
   "include": [
-    "*.ts"
+    "*.ts",
+    "types/**/*"
   ],
   "exclude": [
     "node_modules",

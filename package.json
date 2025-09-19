@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^20.8.7",
     "@types/uuid": "^9.0.6",
+    "@types/bun": "^1.0.0",
     "typescript": "^5.2.2",
     "ts-node": "^10.9.1"
   },
