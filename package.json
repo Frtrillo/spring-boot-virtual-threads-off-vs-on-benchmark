@@ -1,0 +1,23 @@
+{
+  "name": "iot-bench-nodejs",
+  "version": "1.0.0",
+  "description": "Node.js IoT Benchmark Server",
+  "main": "nodejs-server.js",
+  "scripts": {
+    "start": "node nodejs-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1"
+  },
+  "keywords": [
+    "nodejs",
+    "benchmark",
+    "iot",
+    "performance"
+  ],
+  "author": "",
+  "license": "ISC"
+}

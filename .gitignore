@@ -297,8 +297,5 @@ application-*.properties
 !application.yaml
 !application.properties
 
-# Test results
-result_*.txt
-
 # Benchmark scripts (if you want to keep them private)
 # run_benchmark*.sh
