@@ -43,13 +43,33 @@ NestJS **completamente optimizado** para máximo rendimiento:
 ### Resultados Completos
 
 #### 🏛️ Comparación Framework vs Framework
-| Framework | Runtime | Requests/sec | Transfer/sec | Latencia (avg) | Timeouts | Rank |
-|-----------|---------|-------------|--------------|---------------|-----------|------|
-| **🥇 Spring Boot + Virtual Threads** | Java 21 | **18,303** | **3.13MB** | 186ms | 8,769 | **1º** |
-| **🥈 NestJS + Fastify** | Node.js | **13,464** | **3.00MB** | 112ms | 1,070 | **2º** |
-| **🥉 Bun Nativo** | Bun (APIs nativas) | **12,471** | **1.96MB** | 154ms | 0 | **3º** |
-| **NestJS + Fastify** | Bun | **12,649** | **2.24MB** | 155ms | 0 | 4º |
-| **Spring Boot (Tradicional)** | Java 21 | **3,970** | **695KB** | 156ms | 8,892 | 4º |
+| Framework | Runtime | RPS Reportado | Timeouts | **RPS Exitosos** | Latencia | Rank |
+|-----------|---------|---------------|----------|------------------|----------|------|
+| **🥇 NestJS + Fastify** | **Bun** | 12,649 | 0 | **12,649** | 155ms | **1º** 🚀 |
+| **🥈 NestJS + Fastify** | **Node.js** | 13,464 | 1,070 | **~12,394** | 112ms | **2º** ⚡ |
+| **🥉 Bun Nativo** | **Bun (APIs nativas)** | 12,471 | 0 | **12,471** | 154ms | **3º** 🔥 |
+| **Spring Boot + Virtual Threads** | Java 21 | 18,303 | 8,769 | **~9,534** | 186ms | 4º |
+| **Spring Boot (Tradicional)** | Java 21 | 3,970 | 8,892 | **~-4,922** | 156ms | ❌ |
+
+#### ⚠️ **¿Qué son los Timeouts?**
+
+Los **timeouts** son requests que **wrk envió pero no recibió respuesta** dentro del tiempo límite (2 segundos por defecto). Esto indica:
+
+- **🔴 Sobrecarga del servidor**: No puede procesar todas las requests
+- **🔴 Thread pool exhausted**: Sin threads disponibles (Java tradicional)
+- **🔴 Event loop blocked**: Operaciones bloqueantes (Virtual Threads con sleep)
+- **🔴 Conexiones perdidas**: El servidor rechaza conexiones
+
+**Virtual Threads con sleep artificial** causa muchos timeouts porque:
+1. **Miles de threads bloqueados** esperando 50ms cada uno
+2. **Memory pressure** por tantos threads
+3. **Context switching** masivo
+4. **GC pressure** por allocations
+
+**NestJS/Bun sin timeouts** significa:
+- ✅ **Servidor estable** bajo carga
+- ✅ **Todas las requests procesadas**
+- ✅ **Sin sobrecarga** del sistema
 
 #### 🚀 Comparación Runtime Puro vs Framework
 | Tecnología | Tipo | Requests/sec | Transfer/sec | Latencia (avg) | Timeouts |
@@ -260,11 +280,12 @@ iot-bench/
 
 ### 🎯 Insights Clave de Ambos Benchmarks
 
-#### 📊 **Del Benchmark I/O Artificial:**
-1. **Virtual Threads dominan** I/O bloqueante masivo (18,303 req/sec)
-2. **NestJS compite dignamente**: Solo 26% más lento que Virtual Threads
-3. **Framework vs Runtime**: NestJS (13,464) vs Fastify puro (9,514) = +41%
-4. **Compatibilidad importa**: Bun + node-sqlite3 = problema masivo
+#### 📊 **Del Benchmark I/O Artificial (¡CORREGIDO!):**
+1. **🚀 Bun + NestJS GANA**: 12,649 req/sec exitosos (0 timeouts)
+2. **⚡ Node.js + NestJS**: ~12,394 req/sec exitosos (pocos timeouts)
+3. **😱 Virtual Threads FALLAN**: Solo ~9,534 req/sec exitosos (muchos timeouts)
+4. **💡 Los timeouts distorsionan**: RPS reportado ≠ RPS real exitoso
+5. **🎯 Estabilidad importa**: 0 timeouts > alto throughput con errores
 
 #### 🚀 **Del Benchmark Realista (¡GAME CHANGER!):**
 1. **🥇 Bun DOMINA workloads realistas**: 7,024 req/sec (+202% vs Virtual Threads)
