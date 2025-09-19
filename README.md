@@ -20,6 +20,14 @@ Simula un endpoint de ingesta de IoT **real** que:
 - Ejecuta procesamiento CPU-intensivo: validación, enriquecimiento, cálculos Monte Carlo
 - **SIN sleeps artificiales** - workload realista
 
+### ⚡ **Benchmark 3: Ultra-Fast NestJS + SQLite**
+NestJS **completamente optimizado** para máximo rendimiento:
+- Framework NestJS completo (decoradores, DI, Fastify adapter)
+- Base de datos SQLite (Bun nativo vs Node.js)
+- **SIN background processing** - solo HTTP + DB
+- **Prepared statements** optimizados
+- **Memory allocation** minimizada
+
 ## 🏆 Resultados de los Benchmarks
 
 ### Configuración de Prueba
@@ -117,6 +125,9 @@ cd iot-bench
 
 # 5. Benchmark Realista (sin sleeps artificiales)
 ./run_realistic_benchmark.sh
+
+# 6. Ultra-Fast NestJS + SQLite (máximo rendimiento)
+./run_ultra_fast.sh
 ```
 
 ## 📁 Estructura del Proyecto
@@ -147,6 +158,9 @@ iot-bench/
 ├── run_nestjs_benchmark.sh      # Benchmark NestJS (Node.js/Bun)
 ├── run_realistic_benchmark.sh   # Benchmark Realista (sin sleeps)
 ├── realistic-server.js          # Servidor con workload realista
+├── run_ultra_fast.sh            # Benchmark Ultra-Fast NestJS
+├── ultra-fast-server.ts         # NestJS optimizado al máximo
+├── ultra-fast.controller.ts     # Controlador ultra-optimizado
 └── clustered-server.js          # Servidor multi-core clustering
 ```
 
@@ -164,6 +178,13 @@ iot-bench/
 - **TypeScript** con tipado fuerte
 - **Dependency Injection** y arquitectura modular
 - **SQLite3** (in-memory, equivalente a H2)
+
+### NestJS Ultra-Fast
+- **NestJS 10.2.8** completamente optimizado
+- **Bun.sqlite nativo** vs **Node.js SQLite3**
+- **Prepared statements** pre-compilados
+- **Memory allocation** minimizada
+- **Sin background processing** ni overhead innecesario
 
 ### Node.js/Bun Puro
 - **Fastify 4.24.3** (framework web rápido)
@@ -193,9 +214,10 @@ iot-bench/
 - ❌ **NO para processing puro** o workloads CPU-intensivos
 
 **🥇 Bun**
+- ✅ **GANADOR ABSOLUTO optimizado** (21,154 req/sec con NestJS)
 - ✅ **GANADOR para workloads realistas** (7,024 req/sec)
+- ✅ **SQLite nativo 11.3x más rápido** que Node.js
 - ✅ **APIs y microservicios modernos** con processing intensivo
-- ✅ **Aplicaciones IoT** con validación y cálculos
 - ✅ **Cuando el rendimiento máximo es crítico**
 - ⚠️ **Usar APIs nativas** (Bun.sqlite, Bun.serve)
 
@@ -238,11 +260,44 @@ iot-bench/
 4. **☕ Java tradicional MEJOR** que Virtual Threads para CPU: 4,413 req/sec
 5. **🎯 El workload determina todo**: I/O vs CPU cambia completamente el ranking
 
+#### ⚡ **Del Benchmark Ultra-Fast (¡CONFIRMACIÓN!):**
+1. **🚀 Bun + NestJS DOMINA**: 21,154 req/sec (**+89.6%** vs Node.js)
+2. **📊 Confirma benchmarks oficiales**: Bun SQLite es superior
+3. **🎯 Framework completo**: NestJS + decoradores + DI + Fastify
+4. **⚡ Optimización importa**: Eliminar overhead innecesario es clave
+5. **🏆 Bun puede ganar** cuando se optimiza correctamente
+
 #### 💡 **Lecciones Universales:**
 - **Bun + APIs nativas** = Rendimiento superior
 - **Virtual Threads** = Solo para I/O bloqueante específico
 - **JavaScript moderno** supera a Java en la mayoría de casos reales
 - **Los benchmarks artificiales** pueden ser muy engañosos
+
+---
+
+## ⚡ **BENCHMARK 3: Ultra-Fast NestJS + SQLite**
+*Framework completo optimizado al máximo*
+
+### Resultados Optimizados
+
+| Framework | Runtime | Requests/sec | Transfer/sec | Latencia (avg) | Mejora vs Node.js | Rank |
+|-----------|---------|-------------|--------------|---------------|------------------|------|
+| **🥇 NestJS Ultra-Fast** | **Bun + SQLite nativo** | **21,154** | **3.47MB** | 92ms | **+89.6%** | **1º** 🚀 |
+| **🥈 NestJS Ultra-Fast** | **Node.js + SQLite3** | **11,157** | **2.35MB** | 120ms | **Referencia** | **2º** ⚡ |
+
+### 🎯 **¡Finalmente Bun Domina con NestJS!**
+
+#### ✅ **Optimizaciones Aplicadas:**
+- **Prepared statements** reutilizados
+- **Memory allocation** minimizada
+- **Sin background processing** que interfiera
+- **Fastify ultra-optimizado**
+- **Bun.sqlite nativo** vs node-sqlite3
+
+#### 📊 **Confirmación de Benchmarks Oficiales:**
+- **SQLite puro**: Bun 886K ops/sec vs Node.js 78K ops/sec (**+11.3x**)
+- **HTTP + SQLite**: Bun 21K req/sec vs Node.js 11K req/sec (**+89.6%**)
+- **Coincide con** [benchmarks oficiales de Bun](https://github.com/oven-sh/bun/tree/main/bench/sqlite)
 
 ---
 
