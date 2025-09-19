@@ -20,13 +20,20 @@ Este benchmark simula un endpoint de ingesta de IoT que:
 
 ### Resultados Completos
 
-| Tecnología | Requests/sec | Transfer/sec | Latencia (avg) | Timeouts | Rank |
-|------------|-------------|--------------|---------------|-----------|------|
-| **🥇 Spring Boot + Virtual Threads** | **18,303** | **3.13MB** | 186ms | 8,769 | **1º** |
-| **🥈 Fastify + Node.js** | **9,514** | **2.08MB** | 136ms | 1,174 | **2º** |
-| **🥉 Express + Node.js** | **6,239** | **1.74MB** | 165ms | 1,024 | **3º** |
-| **Fastify + Bun** | **4,200** | **745KB** | 450ms | 0 | 4º |
-| **Spring Boot (Tradicional)** | **3,970** | **695KB** | 156ms | 8,892 | 5º |
+#### 🏛️ Comparación Framework vs Framework
+| Framework | Runtime | Requests/sec | Transfer/sec | Latencia (avg) | Timeouts | Rank |
+|-----------|---------|-------------|--------------|---------------|-----------|------|
+| **🥇 Spring Boot + Virtual Threads** | Java 21 | **18,303** | **3.13MB** | 186ms | 8,769 | **1º** |
+| **🥈 NestJS + Fastify** | Node.js | **13,464** | **3.00MB** | 112ms | 1,070 | **2º** |
+| **🥉 NestJS + Fastify** | Bun | **12,649** | **2.24MB** | 155ms | 0 | **3º** |
+| **Spring Boot (Tradicional)** | Java 21 | **3,970** | **695KB** | 156ms | 8,892 | 4º |
+
+#### 🚀 Comparación Runtime Puro vs Framework
+| Tecnología | Tipo | Requests/sec | Transfer/sec | Latencia (avg) | Timeouts |
+|------------|------|-------------|--------------|---------------|-----------|
+| **Fastify** | Runtime Puro (Node.js) | **9,514** | **2.08MB** | 136ms | 1,174 |
+| **Express** | Runtime Puro (Node.js) | **6,239** | **1.74MB** | 165ms | 1,024 |
+| **Fastify** | Runtime Puro (Bun) | **4,200** | **745KB** | 450ms | 0 |
 
 ## 📊 Análisis de Rendimiento
 
@@ -36,11 +43,12 @@ Este benchmark simula un endpoint de ingesta de IoT que:
 - **1.9x más rápido** que la mejor opción de JavaScript
 - Ideal para aplicaciones con alta concurrencia e I/O intensivo
 
-### ⚡ Fastify + Node.js
-- **Segundo lugar** con 9,514 req/sec
-- **53% más rápido** que Express
-- Excelente balance entre rendimiento y ecosistema
-- Latencia más baja (136ms)
+### ⚡ NestJS + Fastify
+- **Segundo lugar** con 13,464 req/sec (Node.js) y 12,649 req/sec (Bun)
+- **Framework enterprise** con arquitectura similar a Spring Boot
+- **Comparación justa**: Framework vs Framework
+- **Latencia excelente** (112ms con Node.js)
+- **41% más rápido** con Node.js que con Bun en este caso de uso
 
 ### 🌐 Express + Node.js
 - **Tercer lugar** con 6,239 req/sec
@@ -88,6 +96,9 @@ cd iot-bench
 
 # 3. Fastify (Node.js o Bun) - interactivo
 ./run_js_benchmark.sh
+
+# 4. NestJS + Fastify (Node.js o Bun) - interactivo
+./run_nestjs_benchmark.sh
 ```
 
 ## 📁 Estructura del Proyecto
@@ -109,10 +120,13 @@ iot-bench/
 ├── src/main/resources/
 │   └── application.yml          # Configuración Spring Boot
 │
-├── nodejs-server.js             # Servidor Fastify
+├── nodejs-server.js             # Servidor Fastify puro
+├── nestjs-server.ts             # Servidor NestJS + Fastify
+├── *.ts                         # Módulos NestJS (controllers, services)
 ├── run_benchmark_fixed.sh       # Benchmark Spring Boot
 ├── run_nodejs_benchmark.sh      # Benchmark Express
-└── run_js_benchmark.sh          # Benchmark Fastify (Node.js/Bun)
+├── run_js_benchmark.sh          # Benchmark Fastify (Node.js/Bun)
+└── run_nestjs_benchmark.sh      # Benchmark NestJS (Node.js/Bun)
 ```
 
 ## 🔧 Configuración Técnica
@@ -123,7 +137,14 @@ iot-bench/
 - **HikariCP** connection pool
 - **Tomcat** embedded server
 
-### Node.js/Bun
+### NestJS + Fastify
+- **NestJS 10.2.8** (framework enterprise con decoradores)
+- **Fastify Adapter** para máximo rendimiento
+- **TypeScript** con tipado fuerte
+- **Dependency Injection** y arquitectura modular
+- **SQLite3** (in-memory, equivalente a H2)
+
+### Node.js/Bun Puro
 - **Fastify 4.24.3** (framework web rápido)
 - **SQLite3** (in-memory, equivalente a H2)
 - **UUID v4** para generación de IDs
@@ -148,11 +169,12 @@ iot-bench/
 - ✅ Cuando el rendimiento máximo es crítico
 - ✅ Equipos con experiencia en Java/Spring
 
-**⚡ Fastify + Node.js**
-- ✅ APIs REST rápidas y eficientes
-- ✅ Desarrollo rápido con ecosistema JavaScript
-- ✅ Equipos full-stack JavaScript
-- ✅ Prototipado y MVP
+**⚡ NestJS + Fastify**
+- ✅ Aplicaciones enterprise con arquitectura escalable
+- ✅ Equipos que vienen de Spring Boot/Java
+- ✅ Microservicios con TypeScript
+- ✅ APIs con decoradores y dependency injection
+- ✅ Desarrollo full-stack con tipado fuerte
 
 **🌐 Express + Node.js**
 - ✅ Aplicaciones web tradicionales
@@ -168,11 +190,12 @@ iot-bench/
 
 ### 🎯 Insights Clave
 
-1. **Virtual Threads son revolucionarios** para I/O intensivo
-2. **La elección de framework importa**: Fastify vs Express (+53%)
-3. **JavaScript sigue siendo competitivo** para muchos casos de uso
-4. **Bun necesita más madurez** para este tipo de cargas de trabajo
-5. **Los threads tradicionales son un cuello de botella** real
+1. **Virtual Threads siguen siendo los reyes** del I/O intensivo
+2. **NestJS compite dignamente**: Solo 26% más lento que Virtual Threads
+3. **Framework vs Runtime**: NestJS (13,464) vs Fastify puro (9,514) = +41%
+4. **Node.js vs Bun**: En frameworks enterprise, Node.js sigue ganando
+5. **Arquitectura importa**: Dependency injection y decoradores tienen overhead mínimo
+6. **TypeScript + Enterprise patterns** son viables para alta performance
 
 ## 📈 Mejoras Futuras
 
