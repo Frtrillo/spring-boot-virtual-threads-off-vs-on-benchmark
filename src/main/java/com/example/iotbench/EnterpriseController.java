@@ -2,7 +2,6 @@ package com.example.iotbench;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -10,65 +9,66 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/enterprise")
 public class EnterpriseController {
 
-    private final EnterpriseService service;
+    private final EnterpriseService enterpriseService;
 
-    public EnterpriseController(EnterpriseService service) {
-        this.service = service;
+    public EnterpriseController(EnterpriseService enterpriseService) {
+        this.enterpriseService = enterpriseService;
     }
 
-    /**
-     * Enterprise IoT Processing Pipeline that showcases Spring Boot's strengths:
-     * 1. Multiple database operations with transactions
-     * 2. Real file I/O operations (not artificial sleeps)
-     * 3. External API calls simulation with actual network I/O
-     * 4. Complex business logic with Spring's enterprise features
-     * 5. Caching and security validations
-     * 6. Error handling and rollback scenarios
-     */
     @PostMapping("/process")
-    @Transactional
     public ResponseEntity<Map<String,Object>> processEnterprise(@RequestBody Map<String,Object> payload) {
         long start = System.nanoTime();
         
         try {
-            // This workload is designed to favor Spring Boot + Virtual Threads:
-            EnterpriseProcessingResult result = service.processEnterpriseWorkload(payload);
-            
-            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+            EnterpriseProcessingResult result = enterpriseService.processEnterpriseWorkload(payload);
+            long elapsedNanos = System.nanoTime() - start;
+            double elapsedMs = elapsedNanos / 1_000_000.0;
             
             Map<String,Object> response = Map.of(
-                "id", result.getId(),
-                "status", result.getStatus(),
+                "id", result.getEventId(),
+                "status", "PROCESSED",
                 "processed_records", result.getProcessedRecords(),
-                "validation_score", result.getValidationScore(),
-                "risk_assessment", result.getRiskAssessment(),
+                "validation_score", result.getValidationResult(),
+                "risk_assessment", result.getRiskScore(),
                 "compliance_check", result.getComplianceStatus(),
-                "processing_time_ms", elapsedMs,
-                "thread_info", Thread.currentThread().toString()
+                "processing_time_ms", Math.round(elapsedMs * 100.0) / 100.0,
+                "thread_info", "Java " + System.getProperty("java.version") + " - " + 
+                              (Thread.currentThread().isVirtual() ? "Virtual Thread" : "Platform Thread")
             );
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            Map<String, Object> error = Map.of(
-                "error", "Enterprise processing failed", 
+            long elapsedNanos = System.nanoTime() - start;
+            double elapsedMs = elapsedNanos / 1_000_000.0;
+            
+            Map<String,Object> errorResponse = Map.of(
+                "error", "Enterprise processing failed",
                 "message", e.getMessage(),
-                "processing_time_ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
+                "processing_time_ms", Math.round(elapsedMs * 100.0) / 100.0
             );
-            return ResponseEntity.status(500).body(error);
+            
+            return ResponseEntity.status(500).body(errorResponse);
         }
     }
 
     @GetMapping("/health")
     public ResponseEntity<Map<String,Object>> health() {
-        Map<String, Object> health = Map.of(
+        Runtime runtime = Runtime.getRuntime();
+        
+        Map<String,Object> health = Map.of(
             "status", "ok",
             "timestamp", new Date(),
             "runtime", "Spring Boot Enterprise",
             "virtual_threads", Thread.currentThread().isVirtual(),
-            "active_threads", Thread.activeCount()
+            "active_threads", Thread.activeCount(),
+            "memory_usage", Map.of(
+                "total", runtime.totalMemory(),
+                "free", runtime.freeMemory(),
+                "max", runtime.maxMemory()
+            )
         );
+        
         return ResponseEntity.ok(health);
     }
 }
-

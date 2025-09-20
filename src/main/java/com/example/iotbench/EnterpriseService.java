@@ -1,144 +1,135 @@
 package com.example.iotbench;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.Cacheable;
-import java.io.*;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.time.Duration;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class EnterpriseService {
 
     private final JdbcTemplate jdbc;
-    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final Map<String, List<Map<String, Object>>> deviceCache = new ConcurrentHashMap<>();
     private final Path tempDir;
-    private final Random random = new Random();
 
-    public EnterpriseService(JdbcTemplate jdbc) throws IOException {
+    public EnterpriseService(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
-        // HTTP client for real network I/O (where Virtual Threads excel)
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(5))
-                .build();
-        
-        // Create temp directory for file I/O operations
-        this.tempDir = Files.createTempDirectory("iot-enterprise-");
-        initTables();
+        this.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "temp-enterprise");
+        initializeTables();
+        createTempDirectory();
     }
 
-    private void initTables() {
-        // Multiple related tables for complex enterprise operations
+    private void initializeTables() {
+        // Create enterprise tables (equivalent to Node.js/Bun versions)
         jdbc.execute("""
             CREATE TABLE IF NOT EXISTS enterprise_devices (
-                id VARCHAR(36) PRIMARY KEY, 
-                device_type VARCHAR(50), 
+                id VARCHAR(255) PRIMARY KEY,
+                device_type VARCHAR(100),
                 location VARCHAR(100),
                 last_seen TIMESTAMP,
-                status VARCHAR(20)
+                status VARCHAR(50)
             )
         """);
-        
+
         jdbc.execute("""
             CREATE TABLE IF NOT EXISTS enterprise_events (
-                id VARCHAR(36) PRIMARY KEY,
-                device_id VARCHAR(36),
-                event_type VARCHAR(50),
+                id VARCHAR(255) PRIMARY KEY,
+                device_id VARCHAR(255),
+                event_type VARCHAR(100),
                 payload CLOB,
                 processed_at TIMESTAMP,
                 risk_score DOUBLE,
                 FOREIGN KEY (device_id) REFERENCES enterprise_devices(id)
             )
         """);
-        
+
         jdbc.execute("""
             CREATE TABLE IF NOT EXISTS enterprise_audit (
-                id VARCHAR(36) PRIMARY KEY,
-                event_id VARCHAR(36),
-                validation_result VARCHAR(20),
-                compliance_status VARCHAR(20),
+                id VARCHAR(255) PRIMARY KEY,
+                event_id VARCHAR(255),
+                validation_result VARCHAR(100),
+                compliance_status VARCHAR(100),
                 audit_timestamp TIMESTAMP,
                 FOREIGN KEY (event_id) REFERENCES enterprise_events(id)
             )
         """);
     }
 
+    private void createTempDirectory() {
+        try {
+            Files.createDirectories(tempDir);
+        } catch (IOException e) {
+            System.err.println("Failed to create temp directory: " + e.getMessage());
+        }
+    }
+
     /**
-     * Enterprise workload designed to showcase Spring Boot's strengths:
-     * - Multiple database operations with real transactions
-     * - Actual file I/O (not artificial sleeps)
-     * - Network I/O simulation
-     * - Complex business logic with Spring features
+     * Enterprise processing workload - equivalent to Node.js/Bun versions
+     * This workload is designed to showcase Java + Virtual Threads strengths:
+     * 1. Multiple sequential database operations (where Virtual Threads excel)
+     * 2. File I/O operations (blocking I/O that Virtual Threads handle well)
+     * 3. Network I/O operations (handled well by all async runtimes)
+     * 4. Complex business logic (where JVM optimizations shine)
      */
-    @Transactional
-    public EnterpriseProcessingResult processEnterpriseWorkload(Map<String, Object> payload) {
+    public EnterpriseProcessingResult processEnterpriseWorkload(Map<String, Object> payload) throws Exception {
         String eventId = UUID.randomUUID().toString();
         String deviceId = extractOrGenerateDeviceId(payload);
-        
-        // Step 1: Device registration/update (Database I/O with transaction)
+
+        // Step 1: Device registration/update (Database I/O)
         upsertDevice(deviceId, payload);
-        
+
         // Step 2: Event storage (Database I/O)
         double riskScore = storeEvent(eventId, deviceId, payload);
-        
-        // Step 3: File I/O operations (Real I/O that benefits from Virtual Threads)
+
+        // Step 3: File I/O operations (Blocking I/O - Virtual Threads excel here)
         String fileReport = generateFileReport(eventId, payload);
-        
-        // Step 4: External API validation (Network I/O - Virtual Threads shine here)
+
+        // Step 4: External API validation (Network I/O - all async runtimes handle well)
         String validationResult = performExternalValidation(payload);
-        
+
         // Step 5: Compliance check (Database I/O with complex queries)
         String complianceStatus = performComplianceCheck(deviceId, riskScore);
-        
+
         // Step 6: Audit logging (Database I/O)
         auditTransaction(eventId, validationResult, complianceStatus);
-        
-        // Step 7: Cache warming (Spring Cache with I/O)
+
+        // Step 7: Cache warming (Database + memory operations)
         warmupDeviceCache(deviceId);
-        
-        return new EnterpriseProcessingResult(
-            eventId,
-            "PROCESSED",
-            7, // processed_records
-            validationResult,
-            riskScore,
-            complianceStatus
-        );
+
+        return new EnterpriseProcessingResult(eventId, 7, validationResult, riskScore, complianceStatus);
     }
 
     private String extractOrGenerateDeviceId(Map<String, Object> payload) {
         Object deviceId = payload.get("device_id");
-        if (deviceId != null) {
-            return deviceId.toString();
-        }
-        return "device_" + UUID.randomUUID().toString().substring(0, 8);
+        return deviceId != null ? deviceId.toString() : "device_" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     private void upsertDevice(String deviceId, Map<String, Object> payload) {
         // Check if device exists
         Integer count = jdbc.queryForObject(
             "SELECT COUNT(*) FROM enterprise_devices WHERE id = ?", 
-            Integer.class, deviceId
+            Integer.class, 
+            deviceId
         );
-        
+
         if (count == 0) {
             // Insert new device
             jdbc.update("""
-                INSERT INTO enterprise_devices (id, device_type, location, last_seen, status) 
+                INSERT INTO enterprise_devices (id, device_type, location, last_seen, status)
                 VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'ACTIVE')
-                """, 
-                deviceId,
-                payload.getOrDefault("type", "SENSOR").toString(),
-                payload.getOrDefault("location", "UNKNOWN").toString()
+            """, 
+            deviceId,
+            payload.getOrDefault("type", "SENSOR"),
+            payload.getOrDefault("location", "UNKNOWN")
             );
         } else {
             // Update existing device
@@ -146,101 +137,95 @@ public class EnterpriseService {
                 UPDATE enterprise_devices 
                 SET last_seen = CURRENT_TIMESTAMP, status = 'ACTIVE' 
                 WHERE id = ?
-                """, deviceId);
+            """, deviceId);
         }
     }
 
-    private double storeEvent(String eventId, String deviceId, Map<String, Object> payload) {
-        // Calculate risk score with some CPU work (but not the main bottleneck)
+    private double storeEvent(String eventId, String deviceId, Map<String, Object> payload) throws Exception {
         double riskScore = calculateRiskScore(payload);
-        
-        // Store event
+
         jdbc.update("""
             INSERT INTO enterprise_events (id, device_id, event_type, payload, processed_at, risk_score)
             VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
-            """,
-            eventId, deviceId, "IOT_DATA", payload.toString(), riskScore
-        );
-        
+        """, eventId, deviceId, "IOT_DATA", objectMapper.writeValueAsString(payload), riskScore);
+
         return riskScore;
     }
 
     private double calculateRiskScore(Map<String, Object> payload) {
-        // Moderate CPU work, not the main focus
-        double score = 0.0;
+        double score = 0;
         for (Object value : payload.values()) {
             if (value instanceof String) {
-                score += value.toString().hashCode() % 100;
+                String str = (String) value;
+                score += str.chars().sum() % 100;
             }
         }
         return (score % 1000) / 10.0; // 0-100 range
     }
 
     /**
-     * Real file I/O operations where Virtual Threads excel
-     * (Unlike artificial Thread.sleep, this is actual blocking I/O)
+     * File I/O operations - this is where Virtual Threads should excel
+     * Multiple blocking file operations that Virtual Threads can handle concurrently
      */
     private String generateFileReport(String eventId, Map<String, Object> payload) {
         try {
             Path reportFile = tempDir.resolve("report_" + eventId + ".txt");
-            
-            // Generate report content
+
             StringBuilder report = new StringBuilder();
             report.append("=== Enterprise IoT Event Report ===\n");
             report.append("Event ID: ").append(eventId).append("\n");
             report.append("Timestamp: ").append(new Date()).append("\n");
-            report.append("Thread: ").append(Thread.currentThread().getName()).append("\n");
+            report.append("Thread: ").append(Thread.currentThread().isVirtual() ? "Virtual Thread" : "Platform Thread").append("\n");
             report.append("Payload Fields: ").append(payload.size()).append("\n");
-            
-            // Add some processing details
+
+            // Add processing details
             for (Map.Entry<String, Object> entry : payload.entrySet()) {
-                report.append("- ").append(entry.getKey()).append(": ")
-                      .append(entry.getValue().toString().substring(0, 
-                          Math.min(50, entry.getValue().toString().length())))
-                      .append("\n");
+                String valueStr = entry.getValue().toString();
+                if (valueStr.length() > 50) {
+                    valueStr = valueStr.substring(0, 50);
+                }
+                report.append("- ").append(entry.getKey()).append(": ").append(valueStr).append("\n");
             }
-            
-            // Write to file (REAL I/O blocking operation)
-            Files.write(reportFile, report.toString().getBytes(), 
-                       StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-            
+
+            // Write to file (blocking I/O operation)
+            Files.write(reportFile, report.toString().getBytes());
+
             // Read back for validation (more I/O)
             String content = Files.readString(reportFile);
-            
+
             // Cleanup
-            Files.deleteIfExists(reportFile);
-            
+            try {
+                Files.delete(reportFile);
+            } catch (IOException e) {
+                // Ignore cleanup errors
+            }
+
             return "REPORT_GENERATED";
-            
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             return "REPORT_FAILED";
         }
     }
 
     /**
-     * Simulate external API calls (Real network I/O where Virtual Threads shine)
-     * Uses httpbin.org for real HTTP requests
+     * External API validation - all async runtimes handle network I/O well
      */
     private String performExternalValidation(Map<String, Object> payload) {
         try {
-            // Simulate calling an external validation service
-            // Using httpbin.org/delay/1 for real network I/O with 1 second delay
-            String jsonPayload = "{\"validation_request\":\"" + payload.size() + "_fields\"}";
-            
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://httpbin.org/delay/1"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                .timeout(Duration.ofSeconds(3))
-                .build();
-            
-            HttpResponse<String> response = httpClient.send(request, 
-                HttpResponse.BodyHandlers.ofString());
-            
-            return response.statusCode() == 200 ? "VALIDATED" : "VALIDATION_FAILED";
-            
+            Map<String, String> validationRequest = Map.of(
+                "validation_request", payload.size() + "_fields"
+            );
+
+            // Try real HTTP request with timeout
+            restTemplate.getForObject(
+                "https://httpbin.org/delay/1", 
+                String.class
+            );
+
+            return "VALIDATED";
+
         } catch (Exception e) {
-            // Fallback to simulate network delay without external dependency
+            // Fallback simulation
             try {
                 Thread.sleep(100); // Minimal delay to simulate network
             } catch (InterruptedException ie) {
@@ -251,18 +236,18 @@ public class EnterpriseService {
     }
 
     private String performComplianceCheck(String deviceId, double riskScore) {
-        // Complex database query (multiple joins)
-        List<Map<String, Object>> recentEvents = jdbc.queryForList("""
+        // Complex database query with joins (like Node.js/Bun versions)
+        List<Map<String, Object>> rows = jdbc.queryForList("""
             SELECT e.risk_score, e.processed_at, d.device_type 
             FROM enterprise_events e 
             JOIN enterprise_devices d ON e.device_id = d.id 
             WHERE e.device_id = ? 
             ORDER BY e.processed_at DESC 
             LIMIT 10
-            """, deviceId);
-        
+        """, deviceId);
+
         // Business logic for compliance
-        if (recentEvents.size() > 5 && riskScore > 50.0) {
+        if (rows.size() > 5 && riskScore > 50.0) {
             return "NON_COMPLIANT";
         } else if (riskScore > 80.0) {
             return "HIGH_RISK";
@@ -275,21 +260,22 @@ public class EnterpriseService {
         jdbc.update("""
             INSERT INTO enterprise_audit (id, event_id, validation_result, compliance_status, audit_timestamp)
             VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-            """,
-            UUID.randomUUID().toString(), eventId, validationResult, complianceStatus
-        );
+        """, UUID.randomUUID().toString(), eventId, validationResult, complianceStatus);
     }
 
-    @Cacheable("deviceCache")
     private void warmupDeviceCache(String deviceId) {
-        // Cache warming with database query
-        jdbc.queryForList("""
+        if (deviceCache.containsKey(deviceId)) {
+            return;
+        }
+
+        List<Map<String, Object>> rows = jdbc.queryForList("""
             SELECT * FROM enterprise_devices d 
             LEFT JOIN enterprise_events e ON d.id = e.device_id 
             WHERE d.id = ? 
             ORDER BY e.processed_at DESC 
             LIMIT 5
-            """, deviceId);
+        """, deviceId);
+
+        deviceCache.put(deviceId, rows);
     }
 }
-

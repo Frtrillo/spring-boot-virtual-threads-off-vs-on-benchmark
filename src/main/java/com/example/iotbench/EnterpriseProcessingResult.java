@@ -1,29 +1,25 @@
 package com.example.iotbench;
 
 public class EnterpriseProcessingResult {
-    private final String id;
-    private final String status;
+    private final String eventId;
     private final int processedRecords;
-    private final String validationScore;
-    private final double riskAssessment;
+    private final String validationResult;
+    private final double riskScore;
     private final String complianceStatus;
 
-    public EnterpriseProcessingResult(String id, String status, int processedRecords, 
-                                    String validationScore, double riskAssessment, 
+    public EnterpriseProcessingResult(String eventId, int processedRecords, 
+                                    String validationResult, double riskScore, 
                                     String complianceStatus) {
-        this.id = id;
-        this.status = status;
+        this.eventId = eventId;
         this.processedRecords = processedRecords;
-        this.validationScore = validationScore;
-        this.riskAssessment = riskAssessment;
+        this.validationResult = validationResult;
+        this.riskScore = riskScore;
         this.complianceStatus = complianceStatus;
     }
 
-    public String getId() { return id; }
-    public String getStatus() { return status; }
+    public String getEventId() { return eventId; }
     public int getProcessedRecords() { return processedRecords; }
-    public String getValidationScore() { return validationScore; }
-    public double getRiskAssessment() { return riskAssessment; }
+    public String getValidationResult() { return validationResult; }
+    public double getRiskScore() { return riskScore; }
     public String getComplianceStatus() { return complianceStatus; }
 }
-
