@@ -13,8 +13,10 @@ com/example/iotbench/OrderResult.class
 com/example/iotbench/UltraFastController.class
 com/example/iotbench/EnterpriseController.class
 com/example/iotbench/Product.class
+com/example/iotbench/PiController.class
 com/example/iotbench/IotBenchApplication.class
 com/example/iotbench/AsyncWorker.class
+com/example/iotbench/PiCalculationApplication.class
 com/example/iotbench/OrderCalculation.class
 com/example/iotbench/CpuComputationResult.class
 com/example/iotbench/IngestService.class
