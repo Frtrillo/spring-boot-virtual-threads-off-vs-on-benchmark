@@ -1,0 +1,10 @@
+Running 1m test @ http://localhost:8080/api/process-order
+  8 threads and 1500 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   237.93ms  252.71ms   4.55s    98.01%
+    Req/Sec   777.54    111.56     1.67k    77.15%
+  371443 requests in 1.00m, 121.08MB read
+  Socket errors: connect 0, read 948, write 0, timeout 0
+  Non-2xx or 3xx responses: 311202
+Requests/sec:   6185.86
+Transfer/sec:      2.02MB
