@@ -37,16 +37,16 @@ Aplicaciones de alta concurrencia intensivas en I/O con utilización adecuada de
 **100 Millones de Iteraciones:**
 | Posición | Runtime | Tiempo | Tasa (ops/seg) | Rendimiento vs Java |
 |----------|---------|--------|----------------|-------------------|
-| 🥇 | **Bun** | 96.66ms | 1,034,587,555 | **1.82x más rápido** |
-| 🥈 | **Node.js** | 111.15ms | 899,676,344 | **1.58x más rápido** |
-| 🥉 | Java | 175.71ms | 569,132,664 | Línea base |
+| 🥇 | **Bun** | 58.60ms | 1,706,426,402 | **2.11x más rápido** |
+| 🥈 | **Java** | 123.57ms | 809,250,818 | Línea base |
+| 🥉 | **Node.js** | 84.22ms | 1,187,359,372 | **1.47x más rápido** |
 
 **1 Billón de Iteraciones:**
 | Posición | Runtime | Tiempo | Tasa (ops/seg) | Rendimiento vs Java |
 |----------|---------|--------|----------------|-------------------|
-| 🥇 | **Bun** | 958.33ms | 1,043,486,926 | **1.03x más rápido** |
-| 🥈 | **Java** | 984.05ms | 1,016,203,578 | Línea base |
-| 🥉 | Node.js | 1,788.66ms | 559,079,217 | 0.55x más lento |
+| 🥇 | **Bun** | 521.03ms | 1,919,260,853 | **3.52x más rápido** |
+| 🥈 | **Java** | 545.30ms | 1,833,838,071 | Línea base |
+| 🥉 | Node.js | 1,213.66ms | 823,954,471 | 0.45x más lento |
 
 ### Rendimiento de Framework (NestJS vs Spring Boot)
 
@@ -193,8 +193,8 @@ Las aplicaciones empresariales típicamente están limitadas por:
 ## 📈 Metodología de Benchmarks
 
 ### Entorno de Prueba
-- **Hardware**: Apple M1/M2, 8 núcleos, 16GB RAM
-- **Sistema Operativo**: macOS 14.6.0
+- **Hardware**: Apple M4, 8 núcleos, 16GB RAM
+- **Sistema Operativo**: macOS 15.0.0
 - **Java**: OpenJDK 21+ con Virtual Threads
 - **Node.js**: v20+ con motor V8
 - **Bun**: Última versión con motor JavaScriptCore
@@ -343,4 +343,4 @@ Para muchas empresas, esa respuesta sigue siendo Java - a pesar del trade-off de
 
 ---
 
-*Benchmarks realizados en Apple Silicon con metodología reproducible. Todo el código y scripts están disponibles en este repositorio para verificación y extensión.*
+*Benchmarks realizados en Apple M4 Silicon con metodología reproducible. Todo el código y scripts están disponibles en este repositorio para verificación y extensión.*
